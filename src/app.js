@@ -3,7 +3,7 @@ import multer from "multer";
 import * as pdfjsLib from "pdfjs-dist";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import path from "path";
-import fs from "fs";
+import fs, { stat } from "fs";
 import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config();
@@ -121,13 +121,24 @@ async function processResume(req, res) {
       .replace(/\\n/g, "\n")
       .trim();
 
-    res.json(JSON.parse(cleanJsonText));
+    // res.json(JSON.parse(cleanJsonText));
+
+    const parsedResult = JSON.parse(cleanJsonText);
+
+    // res.status(200).json(parsedResult);
+
+    return res.status(200).json({
+      success: true,
+      message: "Resume processed successfully.",
+      data: parsedResult,
+    });
 
     // Optionally, delete the uploaded file after processing
-    fs.unlinkSync(filePath);
   } catch (error) {
     console.error("Error processing the resume:", error);
     res.status(500).send("An error occurred while processing the resume.");
+  } finally {
+    fs.unlinkSync(req.file.path);
   }
 }
 
