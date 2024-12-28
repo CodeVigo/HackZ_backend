@@ -11,6 +11,9 @@ import fs from "fs";
 import path from "path";
 import User from "./models/User.js";
 import jobRoutes from "./routes/jobs.js";
+import studentRoutes from "./routes/students.js";
+
+
 
 
 
@@ -143,6 +146,10 @@ app.get("/auth/profile", authenticateToken, async (req, res) => {
 // Add the Job routes
 app.use("/jobs", jobRoutes);
 
+
+// Add the Student routes
+app.use("/students", studentRoutes);
+
 // ---------------- RESUME PROCESSING ROUTES ---------------- //
 
 // Process Resume
@@ -226,6 +233,9 @@ app.post(
       // res.json(JSON.parse(cleanJsonText));
 
       const parsedResult = JSON.parse(cleanJsonText);
+
+      // Save resume data to the user's document
+      await User.findByIdAndUpdate(req.user.id, { resume: parsedResult });
 
       res.status(200).json({
         success: true,

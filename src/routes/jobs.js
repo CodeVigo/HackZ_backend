@@ -6,6 +6,7 @@ const router = express.Router();
 
 // Get all jobs created by the recruiter
 router.get("/", authenticateToken, async (req, res) => {
+  console.log("reached");
   if (req.user.role !== "recruiter") {
     return res
       .status(403)
@@ -53,5 +54,28 @@ router.post("/", authenticateToken, async (req, res) => {
     res.status(500).json({ message: "Failed to create job.", error });
   }
 });
+
+// routes/jobs.js
+router.post("/apply/:jobId", authenticateToken, async (req, res) => {
+  if (req.user.role !== "candidate") {
+    return res
+      .status(403)
+      .json({ message: "Only candidates can apply for jobs." });
+  }
+
+  const { jobId } = req.params;
+
+  try {
+    // Add the job to the candidate's appliedJobs array
+    await User.findByIdAndUpdate(req.user.id, {
+      $addToSet: { appliedJobs: jobId },
+    });
+
+    res.status(200).json({ message: "Applied for the job successfully!" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to apply for the job.", error });
+  }
+});
+
 
 export default router;
